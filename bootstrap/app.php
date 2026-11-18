@@ -29,8 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // IP in X-Forwarded-* headers. Trusting it gives https:// links and
         // redirects (browsers block http:// ones on an https page) and real
         // client IPs for rate limiting. Forwarded headers from anywhere else
-        // are still ignored.
-        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
+        // are still ignored. On Laravel Cloud the framework trusts Cloud's
+        // load balancer by itself, but only while no list is set here.
+        if (! laravel_cloud()) {
+            $middleware->trustProxies(at: ['127.0.0.1', '::1']);
+        }
 
         $middleware->web(append: [
             HandleInertiaRequests::class,
