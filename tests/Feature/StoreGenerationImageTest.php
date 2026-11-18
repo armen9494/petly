@@ -17,7 +17,7 @@ class StoreGenerationImageTest extends TestCase
 
     private const string IMAGE_URL = 'https://pixelforge.promptedit.dev/images/gen_01.png?signature=abc';
 
-    public function test_it_saves_a_copy_of_the_image(): void
+    public function test_it_saves_a_copy_of_the_image_in_the_owners_folder(): void
     {
         Storage::fake();
         Http::fake([self::IMAGE_URL => Http::response('png bytes', 200, ['Content-Type' => 'image/png'])]);
@@ -25,7 +25,7 @@ class StoreGenerationImageTest extends TestCase
 
         StoreGenerationImage::dispatchSync($generation);
 
-        $path = "generations/{$generation->uuid}.png";
+        $path = "generations/{$generation->user_id}/{$generation->uuid}.png";
         Storage::assertExists($path, 'png bytes');
         $this->assertSame($path, $generation->fresh()->image_path);
     }
@@ -50,7 +50,7 @@ class StoreGenerationImageTest extends TestCase
 
         $this->assertThrows(fn () => StoreGenerationImage::dispatchSync($generation), RuntimeException::class);
 
-        Storage::assertMissing("generations/{$generation->uuid}.png");
+        Storage::assertMissing("generations/{$generation->user_id}/{$generation->uuid}.png");
         $this->assertNull($generation->fresh()->image_path);
     }
 

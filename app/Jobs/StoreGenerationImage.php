@@ -45,7 +45,7 @@ class StoreGenerationImage implements ShouldQueueAfterCommit
             throw new RuntimeException("Pixelforge's image for generation {$generation->id} isn't a PNG.");
         }
 
-        $path = "generations/{$generation->uuid}.png";
+        $path = "generations/{$generation->user_id}/{$generation->uuid}.png";
 
         if (! Storage::put($path, $response->body())) {
             throw new RuntimeException("Couldn't save the image for generation {$generation->id}.");
