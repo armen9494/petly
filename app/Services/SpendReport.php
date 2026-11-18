@@ -70,11 +70,12 @@ final readonly class SpendReport
 
     /**
      * The range's totals from our records alone. Unlike build(), this doesn't
-     * ask Pixelforge, so it's cheap and can't fail on their side.
+     * ask Pixelforge, so it's cheap and can't fail on their side. A missing
+     * bound leaves that end of the range open; leave both out for all time.
      *
      * @return array{generations: int, charged: string, charged_nanos: int, provider_cost: string, provider_cost_nanos: int, profit: string}
      */
-    public function totals(CarbonImmutable $from, CarbonImmutable $to): array
+    public function totals(?CarbonImmutable $from = null, ?CarbonImmutable $to = null): array
     {
         return $this->row($this->aggregate($from, $to)->first());
     }
@@ -86,11 +87,12 @@ final readonly class SpendReport
      * @param  list<string>  $columns  SQL expressions to select alongside the sums.
      * @return Collection<int, object>
      */
-    private function aggregate(CarbonImmutable $from, CarbonImmutable $to, array $groups = [], array $columns = []): Collection
+    private function aggregate(?CarbonImmutable $from, ?CarbonImmutable $to, array $groups = [], array $columns = []): Collection
     {
         return Generation::query()
             ->where('status', GenerationStatus::Succeeded)
-            ->whereBetween('completed_at', [$from->startOfDay(), $to->endOfDay()])
+            ->when($from, fn (Builder $query) => $query->where('completed_at', '>=', $from->startOfDay()))
+            ->when($to, fn (Builder $query) => $query->where('completed_at', '<=', $to->endOfDay()))
             ->selectRaw(implode(', ', [
                 ...$columns,
                 'COUNT(*) as generations',

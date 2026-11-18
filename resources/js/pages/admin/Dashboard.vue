@@ -18,8 +18,11 @@ const props = defineProps({
 
 const generations = computed(() => props.stats.generations);
 const finished = computed(() => generations.value.succeeded + generations.value.failed);
+const paid = computed(() => props.stats.paid_to_pixelforge);
 
 const plural = (count, word) => `${count.toLocaleString()} ${word}${count === 1 ? '' : 's'}`;
+
+const reportHref = (from, to) => `/admin/report?from=${from}&to=${to}`;
 
 const CARD = 'rounded-xl border border-stone-200 bg-white shadow-xs';
 const CARD_FOOTER = 'flex items-center gap-1.5 border-t border-stone-100 px-5 py-3 text-sm font-medium text-violet-700 hover:text-violet-900';
@@ -66,6 +69,32 @@ const CARD_FOOTER = 'flex items-center gap-1.5 border-t border-stone-100 px-5 py
                 <Usd :value="stats.unspent_credits" />
             </StatTile>
         </div>
+
+        <section aria-labelledby="paid-to-pixelforge-heading" class="space-y-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h2 id="paid-to-pixelforge-heading" class="font-semibold">Paid to Pixelforge</h2>
+                <p class="text-xs text-stone-500">Our records, by the UTC day each image completed</p>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-3">
+                <StatTile label="All time" :hint="plural(paid.all_time.generations, 'image')">
+                    <Usd :value="paid.all_time.provider_cost" />
+                </StatTile>
+                <StatTile label="Last 30 days">
+                    <Usd :value="paid.last_30_days.provider_cost" />
+                    <template #hint>
+                        {{ plural(paid.last_30_days.generations, 'image') }} ·
+                        <Link :href="reportHref(stats.from, stats.to)" class="font-medium underline-offset-2 hover:underline">Spend report</Link>
+                    </template>
+                </StatTile>
+                <StatTile label="Today (UTC)">
+                    <Usd :value="paid.today.provider_cost" />
+                    <template #hint>
+                        {{ plural(paid.today.generations, 'image') }} ·
+                        <Link :href="reportHref(stats.to, stats.to)" class="font-medium underline-offset-2 hover:underline">Spend report</Link>
+                    </template>
+                </StatTile>
+            </div>
+        </section>
 
         <div class="grid gap-6 lg:grid-cols-2">
             <section aria-labelledby="newest-users-heading" :class="CARD">

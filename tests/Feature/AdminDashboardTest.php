@@ -55,4 +55,28 @@ class AdminDashboardTest extends TestCase
             ->where('latestFailures.0.error_message', 'The model refused.')
             ->where('latestFailures.0.user.email', 'new@example.com'));
     }
+
+    public function test_paid_to_pixelforge_covers_all_time_the_last_30_utc_days_and_today(): void
+    {
+        $this->travelTo('2026-11-17 12:00:00');
+        $admin = User::factory()->admin()->create();
+
+        foreach ([
+            '2026-10-18 23:59:59' => 1_000_000,
+            '2026-10-19 00:00:00' => 20_000_000,
+            '2026-11-16 23:59:59' => 300_000_000,
+            '2026-11-17 00:00:00' => 4_000_000_000,
+        ] as $completedAt => $providerCost) {
+            Generation::factory()->for($admin)->succeeded(providerCost: $providerCost, completedAt: $completedAt)->create();
+        }
+        Generation::factory()->for($admin)->accepted(GenerationStatus::Failed)->create(['completed_at' => '2026-11-17 11:00:00']);
+        Generation::factory()->for($admin)->accepted(GenerationStatus::Processing)->create();
+
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('stats.paid_to_pixelforge', [
+                'all_time' => ['generations' => 4, 'provider_cost' => '4.321000000'],
+                'last_30_days' => ['generations' => 3, 'provider_cost' => '4.320000000'],
+                'today' => ['generations' => 1, 'provider_cost' => '4.000000000'],
+            ]));
+    }
 }

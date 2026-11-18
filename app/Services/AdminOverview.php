@@ -8,10 +8,12 @@ use App\Models\Generation;
 use App\Models\User;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Arr;
 
 /**
  * The headline numbers on the admin overview, for the last 30 UTC days (the
- * spend report's default range) and right now.
+ * spend report's default range) and right now, plus what Pixelforge has
+ * charged us all time, in those 30 days and today.
  */
 final readonly class AdminOverview
 {
@@ -34,12 +36,18 @@ final readonly class AdminOverview
      *     generations: array{succeeded: int, failed: int, in_flight: int, stuck: int},
      *     spend: array<string, int|string>,
      *     unspent_credits: string,
+     *     paid_to_pixelforge: array{
+     *         all_time: array{generations: int, provider_cost: string},
+     *         last_30_days: array{generations: int, provider_cost: string},
+     *         today: array{generations: int, provider_cost: string},
+     *     },
      * }
      */
     public function stats(): array
     {
         $to = CarbonImmutable::today('UTC');
         $from = $to->subDays(self::DAYS - 1);
+        $spend = $this->spendReport->totals($from, $to);
 
         return [
             'from' => $from->toDateString(),
@@ -50,9 +58,25 @@ final readonly class AdminOverview
                 'inactive' => User::query()->where('is_active', false)->count(),
             ],
             'generations' => $this->generations($from),
-            'spend' => $this->spendReport->totals($from, $to),
+            'spend' => $spend,
             'unspent_credits' => Money::toDecimal((int) CreditTransaction::query()->sum('amount')),
+            'paid_to_pixelforge' => [
+                'all_time' => $this->providerCost($this->spendReport->totals()),
+                'last_30_days' => $this->providerCost($spend),
+                'today' => $this->providerCost($this->spendReport->totals($to, $to)),
+            ],
         ];
+    }
+
+    /**
+     * The part of a spend total that Pixelforge charged us, by our records.
+     *
+     * @param  array<string, int|string>  $totals  A SpendReport::totals() result.
+     * @return array{generations: int, provider_cost: string}
+     */
+    private function providerCost(array $totals): array
+    {
+        return Arr::only($totals, ['generations', 'provider_cost']);
     }
 
     /**
