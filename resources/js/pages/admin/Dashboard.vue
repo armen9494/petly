@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader.vue';
 import StatTile from '../../components/StatTile.vue';
 import Usd from '../../components/Usd.vue';
 import UserBadges from '../../components/UserBadges.vue';
+import { STATISTICS_DIGITS } from '../../lib/money';
 import { formatDateTime, timeAgo } from '../../lib/time';
 
 const props = defineProps({
@@ -59,14 +60,14 @@ const CARD_FOOTER = 'flex items-center gap-1.5 border-t border-stone-100 px-5 py
                 </template>
             </StatTile>
             <StatTile label="Credit spend (30 days)" tone="emerald">
-                <Usd :value="stats.spend.charged" />
+                <Usd :value="stats.spend.charged" :digits="STATISTICS_DIGITS" />
                 <template #hint>
-                    <Usd :value="stats.spend.profit" /> profit ·
+                    <Usd :value="stats.spend.profit" :digits="STATISTICS_DIGITS" /> profit ·
                     <Link href="/admin/report" class="font-medium underline-offset-2 hover:underline">Spend report</Link>
                 </template>
             </StatTile>
             <StatTile label="Unspent credits" hint="Credits users have bought but not used yet">
-                <Usd :value="stats.unspent_credits" />
+                <Usd :value="stats.unspent_credits" :digits="STATISTICS_DIGITS" />
             </StatTile>
         </div>
 
@@ -77,17 +78,17 @@ const CARD_FOOTER = 'flex items-center gap-1.5 border-t border-stone-100 px-5 py
             </div>
             <div class="grid gap-4 sm:grid-cols-3">
                 <StatTile label="All time" :hint="plural(paid.all_time.generations, 'image')">
-                    <Usd :value="paid.all_time.provider_cost" />
+                    <Usd :value="paid.all_time.provider_cost" :digits="STATISTICS_DIGITS" />
                 </StatTile>
                 <StatTile label="Last 30 days">
-                    <Usd :value="paid.last_30_days.provider_cost" />
+                    <Usd :value="paid.last_30_days.provider_cost" :digits="STATISTICS_DIGITS" />
                     <template #hint>
                         {{ plural(paid.last_30_days.generations, 'image') }} ·
                         <Link :href="reportHref(stats.from, stats.to)" class="font-medium underline-offset-2 hover:underline">Spend report</Link>
                     </template>
                 </StatTile>
                 <StatTile label="Today (UTC)">
-                    <Usd :value="paid.today.provider_cost" />
+                    <Usd :value="paid.today.provider_cost" :digits="STATISTICS_DIGITS" />
                     <template #hint>
                         {{ plural(paid.today.generations, 'image') }} ·
                         <Link :href="reportHref(stats.to, stats.to)" class="font-medium underline-offset-2 hover:underline">Spend report</Link>

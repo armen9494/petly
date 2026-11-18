@@ -9,6 +9,7 @@ import SubmitButton from '../../../components/SubmitButton.vue';
 import TextField from '../../../components/TextField.vue';
 import Usd from '../../../components/Usd.vue';
 import UserBadges from '../../../components/UserBadges.vue';
+import { STATISTICS_DIGITS } from '../../../lib/money';
 import { formatDate } from '../../../lib/time';
 
 const props = defineProps({
@@ -67,16 +68,16 @@ function save() {
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatTile label="Balance">
-                <Usd :value="userCredits.balance" />
+                <Usd :value="userCredits.balance" :digits="STATISTICS_DIGITS" />
                 <template #hint>
-                    <Usd :value="userCredits.held" /> reserved for unfinished images
+                    <Usd :value="userCredits.held" :digits="STATISTICS_DIGITS" /> reserved for unfinished images
                 </template>
             </StatTile>
             <StatTile label="Requests" :hint="requestsHint">
                 {{ stats.generations.toLocaleString() }}
             </StatTile>
             <StatTile label="Spent on images" hint="All time, at the actual price">
-                <Usd :value="stats.spent" />
+                <Usd :value="stats.spent" :digits="STATISTICS_DIGITS" />
             </StatTile>
         </div>
 

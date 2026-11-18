@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { formatUsd, fromNanos } from '../lib/money';
+import { formatUsd, fromNanos, STATISTICS_DIGITS } from '../lib/money';
 
 /**
  * Daily credit spend as stacked bars: what Pixelforge cost us, plus our profit
@@ -55,7 +55,8 @@ const isEmpty = computed(() => axis.value.ticks.length === 1);
 const labelledIndexes = computed(() => [...new Set([0, Math.floor((bars.value.length - 1) / 2), bars.value.length - 1])]);
 
 const percentOfAxis = (nanos) => `${(nanos / axis.value.top) * 100}%`;
-const money = (nanos) => formatUsd(fromNanos(nanos));
+const money = (nanos) => formatUsd(fromNanos(nanos), STATISTICS_DIGITS);
+const tickLabel = (nanos) => formatUsd(fromNanos(nanos));
 
 function shortDate(date) {
     return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -93,7 +94,7 @@ function tooltipAlignment(index) {
                 class="absolute inset-x-0 flex h-0 items-center gap-3"
                 :style="{ bottom: percentOfAxis(tick) }"
             >
-                <span class="w-14 text-right text-[11px] text-stone-500 tabular-nums">{{ money(tick) }}</span>
+                <span class="w-14 text-right text-[11px] text-stone-500 tabular-nums">{{ tickLabel(tick) }}</span>
                 <span class="h-px flex-1" :class="tick === 0 ? 'bg-stone-300' : 'bg-stone-100'"></span>
             </div>
 

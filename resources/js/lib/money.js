@@ -5,6 +5,11 @@
  */
 const NANOS_PER_DOLLAR = 1_000_000_000n;
 
+/**
+ * Decimals for money in admin statistics, one more than elsewhere: "$0.36401".
+ */
+export const STATISTICS_DIGITS = 5;
+
 export function toNanos(decimal) {
     const negative = decimal.startsWith('-');
     const [whole, fraction = ''] = decimal.replace('-', '').split('.');

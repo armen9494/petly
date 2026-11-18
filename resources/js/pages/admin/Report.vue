@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import PageHeader from '../../components/PageHeader.vue';
 import SpendChart from '../../components/SpendChart.vue';
 import Usd from '../../components/Usd.vue';
+import { STATISTICS_DIGITS } from '../../lib/money';
 
 const props = defineProps({
     from: { type: String, required: true },
@@ -65,18 +66,18 @@ const CELL = 'px-4 py-2.5';
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-xl border border-stone-200 bg-white p-5 shadow-xs">
                 <p class="text-sm text-stone-500">Credit spend</p>
-                <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.charged" /></p>
+                <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.charged" :digits="STATISTICS_DIGITS" /></p>
                 <p class="mt-1 text-xs text-stone-400">{{ report.total.generations }} succeeded generations</p>
             </div>
             <div class="rounded-xl border border-stone-200 bg-white p-5 shadow-xs">
                 <p class="text-sm text-stone-500">Provider cost (our records)</p>
-                <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.provider_cost" /></p>
+                <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.provider_cost" :digits="STATISTICS_DIGITS" /></p>
                 <p class="mt-1 font-mono text-xs text-stone-400">{{ report.total.provider_cost }}</p>
             </div>
             <div class="rounded-xl border border-stone-200 bg-white p-5 shadow-xs">
                 <p class="text-sm text-stone-500">Pixelforge says</p>
                 <template v-if="report.total.pixelforge">
-                    <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.pixelforge.cost" /></p>
+                    <p class="mt-1 text-2xl font-semibold tracking-tight"><Usd :value="report.total.pixelforge.cost" :digits="STATISTICS_DIGITS" /></p>
                     <p class="mt-1 text-xs" :class="reconciles(report.total) ? 'text-emerald-700' : 'text-amber-700'">
                         {{ reconciles(report.total) ? 'Matches to the nanodollar' : `${mismatchedDays} day(s) differ` }}
                     </p>
@@ -85,7 +86,7 @@ const CELL = 'px-4 py-2.5';
             </div>
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-xs">
                 <p class="text-sm text-emerald-700">Profit</p>
-                <p class="mt-1 text-2xl font-semibold tracking-tight text-emerald-900"><Usd :value="report.total.profit" /></p>
+                <p class="mt-1 text-2xl font-semibold tracking-tight text-emerald-900"><Usd :value="report.total.profit" :digits="STATISTICS_DIGITS" /></p>
                 <p class="mt-1 text-xs text-emerald-700">{{ margin(report.total) }} margin</p>
             </div>
         </div>
